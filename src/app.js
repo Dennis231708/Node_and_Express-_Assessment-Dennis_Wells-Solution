@@ -3,6 +3,25 @@ const app = express();
 const getZoos = require("./utils/getZoos");
 const validateZip = require("./middleware/validateZip");
 
+app.get("/zoos/all", (req, res, next) => {
+  const isAdmin = req.query.admin === "true";
+  if (!isAdmin) {
+    const error = new Error("You do not have access to that route.");
+    error.status = 403;
+    return next(error);
+  }
+
+  const zoos = getZoos("all");
+  if (zoos.length > 0) {
+    // Ensure the response starts with a capital "A" for "All zoos"
+    const responseMessage = `All zoos: ${zoos.join("; ")}`;
+    res.send(responseMessage);
+  } else {
+    res.send("There are no zoos.");
+  }
+});
+
+
 // Routes
 app.get("/check/:zip", validateZip, (req, res) => {
   const zip = req.params.zip;
@@ -24,23 +43,23 @@ app.get("/zoos/:zip", validateZip, (req, res) => {
   }
 });
 
-app.get("/zoos/all", (req, res, next) => {
-  const isAdmin = req.query.admin === "true";
-  if (!isAdmin) {
-    const error = new Error("You do not have access to that route.");
-    error.status = 403;
-    return next(error);
-  }
+// app.get("/zoos/all", (req, res, next) => {
+//   const isAdmin = req.query.admin === "true";
+//   if (!isAdmin) {
+//     const error = new Error("You do not have access to that route.");
+//     error.status = 403;
+//     return next(error);
+//   }
 
-  const zoos = getZoos("all");
-  if (zoos.length > 0) {
-    // Ensure the response starts with a capital "A" for "All zoos"
-    const responseMessage = `All zoos: ${zoos.join("; ")}`;
-    res.send(responseMessage);
-  } else {
-    res.send("There are no zoos.");
-  }
-});
+//   const zoos = getZoos("all");
+//   if (zoos.length > 0) {
+//     // Ensure the response starts with a capital "A" for "All zoos"
+//     const responseMessage = `All zoos: ${zoos.join("; ")}`;
+//     res.send(responseMessage);
+//   } else {
+//     res.send("There are no zoos.");
+//   }
+// });
 
 // Error handling for route not found
 app.use((req, res, next) => {
